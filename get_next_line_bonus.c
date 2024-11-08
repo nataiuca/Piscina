@@ -6,13 +6,13 @@
 /*   By: natferna <natferna@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 01:43:02 by natferna          #+#    #+#             */
-/*   Updated: 2024/11/08 14:38:06 by natferna         ###   ########.fr       */
+/*   Updated: 2024/11/08 14:59:45 by natferna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-char	*get_line(char **remainder)
+static char	*get_line(char **remainder)
 {
 	char	*line;
 	char	*temp;
@@ -41,45 +41,45 @@ char	*get_line(char **remainder)
 	return (line);
 }
 
-char	*append_buffer(char *remainder, char *buf)
+static char	*append_buffer(char *remainder, char *buf)
 {
 	char	*temp;
 
 	if (!remainder)
-		remainder = ft_strdup(buf);
-	else
-	{
-		temp = ft_strjoin(remainder, buf);
-		free(remainder);
-		remainder = temp;
-	}
-	return (remainder);
+		return (ft_strdup(buf));
+	temp = ft_strjoin(remainder, buf);
+	free(remainder);
+	return (temp);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*remainder[MAX_FD];
-	char		buf[BUFFER_SIZE + 1];
+	static char	*remainder;
+	char		*buf;
 	int			read_bytes;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buf = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buf)
 		return (NULL);
 	read_bytes = read(fd, buf, BUFFER_SIZE);
 	while (read_bytes > 0)
 	{
 		buf[read_bytes] = '\0';
-		remainder[fd] = append_buffer(remainder[fd], buf);
-		if (ft_strchr(remainder[fd], '\n'))
+		remainder = append_buffer(remainder, buf);
+		if (ft_strchr(remainder, '\n'))
 			break ;
 		read_bytes = read(fd, buf, BUFFER_SIZE);
 	}
+	free(buf);
 	if (read_bytes == -1)
 	{
-		free(remainder[fd]);
-		remainder[fd] = NULL;
+		free(remainder);
+		remainder = NULL;
 		return (NULL);
 	}
-	if (read_bytes == 0 && !remainder[fd])
+	if (read_bytes == 0 && !remainder)
 		return (NULL);
-	return (get_line(&remainder[fd]));
+	return (get_line(&remainder));
 }

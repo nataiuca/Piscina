@@ -6,13 +6,13 @@
 /*   By: natferna <natferna@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 16:40:52 by natferna          #+#    #+#             */
-/*   Updated: 2024/11/08 14:36:26 by natferna         ###   ########.fr       */
+/*   Updated: 2024/11/08 14:59:52 by natferna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*get_line(char **remainder)
+static char	*get_line(char **remainder)
 {
 	char	*line;
 	char	*temp;
@@ -41,28 +41,27 @@ char	*get_line(char **remainder)
 	return (line);
 }
 
-char	*append_buffer(char *remainder, char *buf)
+static char	*append_buffer(char *remainder, char *buf)
 {
 	char	*temp;
 
 	if (!remainder)
-		remainder = ft_strdup(buf);
-	else
-	{
-		temp = ft_strjoin(remainder, buf);
-		free(remainder);
-		remainder = temp;
-	}
-	return (remainder);
+		return (ft_strdup(buf));
+	temp = ft_strjoin(remainder, buf);
+	free(remainder);
+	return (temp);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*remainder;
-	char		buf[BUFFER_SIZE + 1];
+	char		*buf;
 	int			read_bytes;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buf = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buf)
 		return (NULL);
 	read_bytes = read(fd, buf, BUFFER_SIZE);
 	while (read_bytes > 0)
@@ -73,6 +72,7 @@ char	*get_next_line(int fd)
 			break ;
 		read_bytes = read(fd, buf, BUFFER_SIZE);
 	}
+	free(buf);
 	if (read_bytes == -1)
 	{
 		free(remainder);
